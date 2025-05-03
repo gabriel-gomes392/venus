@@ -146,16 +146,33 @@
     }
 
     function simularGeocentrismo(centroX, centroY) {
+      // Terra fixa no centro
       terra.atualizarPosicao(centroX, centroY);
       terra.desenhar();
       
-      let solX = centroX + cos(tempo) * 120;
-      let solY = centroY + sin(tempo) * 120;
+      // Sol orbitando a Terra (raio maior)
+      let raioOrbitaSol = 120;
+      let solX = centroX + cos(tempo) * raioOrbitaSol;
+      let solY = centroY + sin(tempo) * raioOrbitaSol;
       sol.atualizarPosicao(solX, solY);
       sol.desenhar();
       
-      let venusX = solX + cos(tempo * 3) * 40;
-      let venusY = solY + sin(tempo * 3) * 40;
+      // Vênus orbitando o Sol (raio menor e limitado para nunca ultrapassar)
+      let raioOrbitaVenus = 40 * 0.7; // Reduzido para garantir visibilidade
+      let venusX = solX + cos(tempo * 3) * raioOrbitaVenus;
+      let venusY = solY + sin(tempo * 3) * raioOrbitaVenus;
+      
+      // Garante que Vênus nunca ultrapasse a linha Terra-Sol visualmente
+      let angulo = atan2(venusY - centroY, venusX - centroX);
+      let anguloSol = atan2(solY - centroY, solX - centroX);
+      let diferencaAngular = abs(angulo - anguloSol);
+      
+      if (diferencaAngular > PI/2 && diferencaAngular < 3*PI/2) {
+        // Corrige posição se estiver começando a "passar atrás"
+        venusX = solX + cos(anguloSol + PI/2) * raioOrbitaVenus * 0.9;
+        venusY = solY + sin(anguloSol + PI/2) * raioOrbitaVenus * 0.9;
+      }
+      
       venus.atualizarPosicao(venusX, venusY);
       venus.desenhar();
       
@@ -185,7 +202,7 @@
       }
       
       if (!modeloHeliocentrico) {
-        fase = constrain(fase, 0, 0.5);
+        fase = constrain(fase, 0, 0.5); // Limita a fase no geocentrismo
       }
       
       return fase;
