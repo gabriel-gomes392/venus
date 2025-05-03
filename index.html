@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Simulação: Fases de Vênus</title>
+<meta name="description" content="Demonstração interativa do geocentrismo vs heliocentrismo">  
+<head>
+    <title>Fases de Vênus - Geocentrismo vs. Heliocentrismo</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.js"></script>
+    <script>
+      let modeloHeliocentrico = true;
+      let terra, venus, sol;
+      let tempo = 0;
+      let velocidadeOrbital = 0.01;
+      let mostrarExplicacao = false;
+
+      function setup() {
+        createCanvas(800, 600);
+        sol = new Planeta(width / 2, height / 2, 30, color(255, 204, 0));
+        terra = new Planeta(width / 2, height / 2, 15, color(0, 100, 255));
+        venus = new Planeta(width / 2 + 100, height / 2, 10, color(200, 150, 50));
+      }
+
+      function draw() {
+        background(0);
+        
+        fill(255);
+        textSize(20);
+        textAlign(CENTER);
+        text("Fases de Vênus: Geocentrismo vs. Heliocentrismo", width / 2, 30);
+        textSize(16);
+        text("Pressione 'G' para Geocentrismo | 'H' para Heliocentrismo", width / 2, 60);
+        text("Clique para mostrar/ocultar explicação", width / 2, 90);
+        
+        if (modeloHeliocentrico) {
+          simularHeliocentrismo();
+        } else {
+          simularGeocentrismo();
+        }
+        
+        if (mostrarExplicacao) {
+          desenharExplicacao();
+        }
+      }
+
+      function simularHeliocentrismo() {
+        sol.desenhar();
+        
+        let terraX = width / 2 + cos(tempo) * 150;
+        let terraY = height / 2 + sin(tempo) * 150;
+        terra.atualizarPosicao(terraX, terraY);
+        terra.desenhar();
+        
+        let venusX = width / 2 + cos(tempo * 1.6) * 80;
+        let venusY = height / 2 + sin(tempo * 1.6) * 80;
+        venus.atualizarPosicao(venusX, venusY);
+        venus.desenhar();
+        
+        stroke(100);
+        line(terraX, terraY, venusX, venusY);
+        
+        let fase = calcularFase(venusX, venusY, terraX, terraY, sol.x, sol.y);
+        desenharFase(fase, 700, 200);
+        
+        tempo += velocidadeOrbital;
+      }
+
+      function simularGeocentrismo() {
+        terra.atualizarPosicao(width / 2, height / 2);
+        terra.desenhar();
+        
+        let solX = width / 2 + cos(tempo) * 120;
+        let solY = height / 2 + sin(tempo) * 120;
+        sol.atualizarPosicao(solX, solY);
+        sol.desenhar();
+        
+        let venusX = solX + cos(tempo * 3) * 40;
+        let venusY = solY + sin(tempo * 3) * 40;
+        venus.atualizarPosicao(venusX, venusY);
+        venus.desenhar();
+        
+        stroke(100);
+        line(width / 2, height / 2, venusX, venusY);
+        
+        let fase = calcularFase(venusX, venusY, width / 2, height / 2, solX, solY);
+        desenharFase(fase, 700, 200);
+        
+        tempo += velocidadeOrbital;
+      }
+
+      function calcularFase(venusX, venusY, terraX, terraY, solX, solY) {
+        let terraParaVenusX = venusX - terraX;
+        let terraParaVenusY = venusY - terraY;
+        let terraParaSolX = solX - terraX;
+        let terraParaSolY = solY - terraY;
+        
+        let angulo = atan2(terraParaVenusY, terraParaVenusX) - atan2(terraParaSolY, terraParaSolX);
+        if (angulo < 0) angulo += TWO_PI;
+        
+        let fase;
+        if (angulo <= PI) {
+          fase = map(angulo, 0, PI, 0, 1);
+        } else {
+          fase = map(angulo, PI, TWO_PI, 1, 0);
+        }
+        
+        if (!modeloHeliocentrico) {
+          fase = constrain(fase, 0, 0.5);
+        }
+        
+        return fase;
+      }
+
+      function desenharFase(fase, x, y) {
+        push();
+        translate(x, y);
+        fill(200, 150, 50);
+        noStroke();
+        ellipse(0, 0, 50);
+        
+        fill(0);
+        if (fase < 0.5) {
+          arc(0, 0, 50, 50, -PI/2, -PI/2 + TWO_PI * fase);
+        } else {
+          arc(0, 0, 50, 50, PI/2, PI/2 + TWO_PI * (1 - fase));
+        }
+        
+        fill(255);
+        textSize(14);
+        textAlign(CENTER);
+        if (fase < 0.1) text("Nova", 0, 40);
+        else if (fase < 0.4) text("Crescente", 0, 40);
+        else if (fase < 0.6) text("Quarto", 0, 40);
+        else if (fase < 0.9) text("Minguante", 0, 40);
+        else text("Cheia", 0, 40);
+        pop();
+      }
+
+      function desenharExplicacao() {
+        fill(0, 180);
+        rect(50, 400, width - 100, 150, 10);
+        fill(255);
+        textSize(16);
+        textAlign(LEFT);
+        
+        if (modeloHeliocentrico) {
+          text("Modelo Heliocêntrico (Copérnico/Galileu):", 70, 430);
+          text("- Sol no centro, Terra e Vênus orbitando.", 70, 460);
+          text("- Vênus pode estar em qualquer fase (incluindo cheia).", 70, 490);
+          text("- Foi isso que Galileu observou com seu telescópio!", 70, 520);
+        } else {
+          text("Modelo Geocêntrico (Ptolomeu):", 70, 430);
+          text("- Terra no centro, Vênus sempre entre Terra e Sol.", 70, 460);
+          text("- Vênus NUNCA pode estar cheia (pois nunca fica atrás do Sol).", 70, 490);
+          text("- Isso contradiz observações reais.", 70, 520);
+        }
+      }
+
+      function keyPressed() {
+        if (key === 'G' || key === 'g') modeloHeliocentrico = false;
+        if (key === 'H' || key === 'h') modeloHeliocentrico = true;
+      }
+
+      function mouseClicked() {
+        mostrarExplicacao = !mostrarExplicacao;
+      }
+
+      class Planeta {
+        constructor(x, y, raio, cor) {
+          this.x = x;
+          this.y = y;
+          this.raio = raio;
+          this.cor = cor;
+        }
+        
+        atualizarPosicao(x, y) {
+          this.x = x;
+          this.y = y;
+        }
+        
+        desenhar() {
+          fill(this.cor);
+          noStroke();
+          ellipse(this.x, this.y, this.raio * 2);
+        }
+      }
+    </script>
+  </head>
+</head>
+  <body>
+    <!-- O canvas do p5.js será inserido aqui automaticamente -->
+  </body>
+</html>
