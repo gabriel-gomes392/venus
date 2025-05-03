@@ -210,22 +210,35 @@
     }
 
     function desenharExplicacao() {
+      let yPos = height - 150;
+      let alturaCaixa = 120;
+      let textoSize = 14;
+      
+      if (windowWidth >= 600) {
+        yPos = height - 180;
+        alturaCaixa = 150;
+        textoSize = 16;
+      }
+
       fill(0, 180);
-      rect(50, height - 180, width - 100, 150, 10);
+      rect(20, yPos, width - 40, alturaCaixa, 10);
       fill(255);
-      textSize(16);
+      textSize(textoSize);
       textAlign(LEFT);
       
+      let textoY = yPos + 25;
+      let linhaHeight = 20;
+      
       if (modeloHeliocentrico) {
-        text("Modelo Heliocêntrico (Copérnico/Galileu):", 70, height - 150);
-        text("- Sol no centro, Terra e Vênus orbitando.", 70, height - 120);
-        text("- Vênus pode estar em qualquer fase (incluindo cheia).", 70, height - 90);
-        text("- Foi isso que Galileu observou com seu telescópio!", 70, height - 60);
+        text("Modelo Heliocêntrico:", 30, textoY);
+        text("- Sol no centro", 30, textoY + linhaHeight);
+        text("- Vênus mostra todas as fases", 30, textoY + linhaHeight*2);
+        text("- Galileu comprovou em 1610", 30, textoY + linhaHeight*3);
       } else {
-        text("Modelo Geocêntrico (Ptolomeu):", 70, height - 150);
-        text("- Terra no centro, Vênus sempre entre Terra e Sol.", 70, height - 120);
-        text("- Vênus NUNCA pode estar cheia (pois nunca fica atrás do Sol).", 70, height - 90);
-        text("- Isso contradiz observações reais.", 70, height - 60);
+        text("Modelo Geocêntrico:", 30, textoY);
+        text("- Terra no centro", 30, textoY + linhaHeight);
+        text("- Vênus nunca atrás do Sol", 30, textoY + linhaHeight*2);
+        text("- Nunca vemos Vênus cheio", 30, textoY + linhaHeight*3);
       }
     }
 
