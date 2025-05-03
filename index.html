@@ -69,7 +69,6 @@
     let terra, venus, sol;
     let tempo = 0;
     let velocidadeOrbital = 0.01;
-    let mostrarExplicacao = false;
     let canvas;
 
     function setup() {
@@ -102,10 +101,6 @@
         simularHeliocentrismo(centroX, centroY);
       } else {
         simularGeocentrismo(centroX, centroY);
-      }
-      
-      if (mostrarExplicacao) {
-        desenharExplicacao();
       }
     }
 
@@ -187,17 +182,23 @@
     function desenharFase(fase, x, y) {
       push();
       translate(x, y);
+      
+      // Desenha Vênus (cheio)
       fill(200, 150, 50);
       noStroke();
       ellipse(0, 0, 50);
       
+      // Desenha sombra (fase)
       fill(0);
-      if (fase < 0.5) {
+      if (fase === 1) {
+        // Fase cheia - sem sombra
+      } else if (fase < 0.5) {
         arc(0, 0, 50, 50, -PI/2, -PI/2 + TWO_PI * fase);
       } else {
         arc(0, 0, 50, 50, PI/2, PI/2 + TWO_PI * (1 - fase));
       }
       
+      // Texto da fase
       fill(255);
       textSize(14);
       textAlign(CENTER);
@@ -209,39 +210,6 @@
       pop();
     }
 
-    function desenharExplicacao() {
-      let yPos = height - 150;
-      let alturaCaixa = 120;
-      let textoSize = 14;
-      
-      if (windowWidth >= 600) {
-        yPos = height - 180;
-        alturaCaixa = 150;
-        textoSize = 16;
-      }
-
-      fill(0, 180);
-      rect(20, yPos, width - 40, alturaCaixa, 10);
-      fill(255);
-      textSize(textoSize);
-      textAlign(LEFT);
-      
-      let textoY = yPos + 25;
-      let linhaHeight = 20;
-      
-      if (modeloHeliocentrico) {
-        text("Modelo Heliocêntrico:", 30, textoY);
-        text("- Sol no centro", 30, textoY + linhaHeight);
-        text("- Vênus mostra todas as fases", 30, textoY + linhaHeight*2);
-        text("- Galileu comprovou em 1610", 30, textoY + linhaHeight*3);
-      } else {
-        text("Modelo Geocêntrico:", 30, textoY);
-        text("- Terra no centro", 30, textoY + linhaHeight);
-        text("- Vênus nunca atrás do Sol", 30, textoY + linhaHeight*2);
-        text("- Nunca vemos Vênus cheio", 30, textoY + linhaHeight*3);
-      }
-    }
-
     function keyPressed() {
       if (key === 'G' || key === 'g') {
         modeloHeliocentrico = false;
@@ -251,10 +219,6 @@
         modeloHeliocentrico = true;
         updateButtons();
       }
-    }
-
-    function mouseClicked() {
-      mostrarExplicacao = !mostrarExplicacao;
     }
 
     function updateButtons() {
